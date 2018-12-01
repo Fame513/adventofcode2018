@@ -9,7 +9,7 @@ run().then(([result1, result2]) => {
 });
 
 function calculatePart1(input: number[]) {
-  return input.reduce((buf, value) => buf+=value);
+  return input.reduce((buf, value) => buf + value);
 }
 
 function calculatePart2(input: number[]) {
