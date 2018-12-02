@@ -8,19 +8,66 @@ run().then(([result1, result2]) => {
   console.log('Part 2:', result2);
 });
 
-function calculatePart1(input: any) {
+function calculatePart1(input: string[]): number {
+  let twoCount = 0;
+  let threeCount = 0;
+  for (const row of input) {
+    const countMap = {};
+    for (let i = 0; i < row.length; i++) {
+      const char = row.charAt(i);
+      if (countMap[char]) {
+        countMap[char]++;
+      } else {
+        countMap[char] = 1;
+      }
+    }
+    
+    let addTwo = false;
+    let addThree = false;
+    for (const key in countMap) {
+      if (countMap[key] === 2) {
+        addTwo = true;
+      } else if (countMap[key] === 3) {
+        addThree = true;
+      }
+    }
+    
+    twoCount += addTwo ? 1 : 0;
+    threeCount += addThree ? 1 : 0;
+  }
   
+  return twoCount * threeCount;
 }
 
-function calculatePart2(input: any) {
- 
+function calculatePart2(input: string[]): string {
+ for (let i = 0; i < input.length - 1; i++) {
+   for (let j = i + 1; j < input.length; j++) {
+     const a = input[i];
+     const b = input[j];
+     if (a.length !== b.length){
+       continue;
+     }
+     let difIndex = -1;
+     for (let c = 0; c < a.length; c++) {
+       if (a[c] !== b[c]) {
+         if (difIndex < 0) {
+           difIndex = c;
+         } else {
+           difIndex = -1;
+           break
+         }
+       }
+     }
+     if (difIndex >=0) {
+       return a.slice(0, difIndex) + a.slice(difIndex + 1);
+     }
+   }
+ }
 }
 
-function parse(input: string): number[][] {
-  const regexp = /\d+/g;
+function parse(input: string): string[] {
   return input.split('\n')
-    .map(row => row.match(regexp)
-      .map(val => +val))
+    .map(row => row.trim())
 }
 
 export async function run() {
@@ -33,9 +80,25 @@ export async function run() {
 function tests() {
   const part1Test = getTestFunction((input) => calculatePart1(input));
   const part2Test = getTestFunction((input) => calculatePart2(input));
-  part1Test([1, 1, 1], 3);
+  part1Test([
+    'abcdef',
+    'bababc',
+    'abbcde',
+    'abcccd',
+    'aabcdd',
+    'abcdee',
+    'ababab',
+  ], 12);
   console.log('---------------------');
 
-  part2Test([+1, -1], 0);
+  part2Test([
+    'abcde',
+    'fghij',
+    'klmno',
+    'pqrst',
+    'fguij',
+    'axcye',
+    'wvxyz',
+  ], 'fgij');
   console.log('---------------------');
 }
