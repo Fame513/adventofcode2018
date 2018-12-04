@@ -1,6 +1,6 @@
 import {getInput, getTestFunction} from './helper';
 
-const DAY = 5;
+const DAY = 6;
 
 tests();
 run().then(([result1, result2]) => {
