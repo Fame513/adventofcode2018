@@ -32,7 +32,7 @@ function calculatePart2(input) {
   const firstReact = react(input);
   let min = Infinity;
   for (const leter of alph) {
-    const str = firstReact.replace(RegExp(`${leter}|${leter.toUpperCase()}`, 'g'), '');
+    const str = firstReact.replace(RegExp(`${leter}`, 'gi'), '');
     const react2 = react(str);
     const length = react2.length;
     if (length < min) {
