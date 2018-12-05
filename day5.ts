@@ -8,12 +8,45 @@ run().then(([result1, result2]) => {
   console.log('Part 2:', result2);
 });
 
-function calculatePart1(input) {
-  
+function react(input: string): string {
+  let arr = input.split('');
+  let stop = false;
+  while (!stop) {
+    stop = true;
+    for (let i = 0; i < arr.length - 1; i++) {
+      if (Math.abs(arr[i].charCodeAt(0) - arr[i + 1].charCodeAt(0)) === 32) {
+        arr.splice(i, 2);
+        const stop = false;
+        i-=2;
+        if (i < 0) {
+          i = -1;
+        }
+      }
+    }
+  }
+  return arr.join('');
+}
+
+function calculatePart1(input: string) {
+  const result = react(input);
+  return result.length;
 }
 
 function calculatePart2(input) {
-
+  const alph = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',] 
+  const firstReact = react(input);
+  let min = Infinity;
+  for (const leter of alph) {
+    const str = firstReact.replace(RegExp(`${leter}|${leter.toUpperCase()}`, 'g'), '');
+    const react2 = react(str);
+    const length = react2.length;
+    if (length < min) {
+      min = length;
+    }
+  }
+  
+  return min;
+  
 }
 
 function parse(input: string): number[] {
@@ -25,17 +58,17 @@ function parse(input: string): number[] {
 
 export async function run() {
   const input: string = await getInput(DAY);
-  const result1 = calculatePart1(parse(input));
-  const result2 = calculatePart2(parse(input));
+  const result1 = calculatePart1(input);
+  const result2 = calculatePart2(input);
   return [result1, result2]
 }
 
 function tests() {
-  const part1Test = getTestFunction((input) => calculatePart1(parse(input)));
-  const part2Test = getTestFunction((input) => calculatePart2(parse(input)));
-  part1Test([], 0);
+  const part1Test = getTestFunction((input) => calculatePart1(input));
+  const part2Test = getTestFunction((input) => calculatePart2(input));
+  part1Test('dabAcCaCBAcCcaDA', 10);
   console.log('---------------------');
 
-  part2Test([], 0);
+  part2Test('dabAcCaCBAcCcaDA', 4);
   console.log('---------------------');
 }
