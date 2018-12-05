@@ -10,19 +10,14 @@ run().then(([result1, result2]) => {
 
 function react(input: string): string {
   let arr = input.split('');
-  let stop = false;
-  while (!stop) {
-    stop = true;
-    for (let i = 0; i < arr.length - 1; i++) {
+  let i = 0;
+    while (i < arr.length - 1) {
       if (Math.abs(arr[i].charCodeAt(0) - arr[i + 1].charCodeAt(0)) === 32) {
         arr.splice(i, 2);
-        const stop = false;
-        i-=2;
-        if (i < 0) {
-          i = -1;
-        }
+        i = i === 0 ? 0 : i - 1;
+      } else {
+        i++
       }
-    }
   }
   return arr.join('');
 }
@@ -33,7 +28,7 @@ function calculatePart1(input: string) {
 }
 
 function calculatePart2(input) {
-  const alph = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z',] 
+  const alph = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z'];
   const firstReact = react(input);
   let min = Infinity;
   for (const leter of alph) {
@@ -44,9 +39,7 @@ function calculatePart2(input) {
       min = length;
     }
   }
-  
   return min;
-  
 }
 
 function parse(input: string): number[] {

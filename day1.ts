@@ -2,7 +2,7 @@ import {getInput, getTestFunction} from './helper';
 
 const DAY = 1;
 
-// tests();
+tests();
 run().then(([result1, result2]) => {
   console.log('Part 1:', result1);
   console.log('Part 2:', result2);
@@ -35,7 +35,7 @@ function calculatePart2v2(input: number[]) {
       arr.push(arr[arr.length - 1] + i);
     }
   }
-  
+
   const sum = arr[arr.length - 1];
   const modArr = arr.map((v, i) => ({
       mod: v < 0 ? (v + sum) % sum : v % sum,
