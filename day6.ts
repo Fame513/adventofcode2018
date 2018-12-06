@@ -1,104 +1,82 @@
 import {getInput, getTestFunction} from './helper';
 
 const DAY = 6;
-
+type Point = { x: number, y: number }
 tests();
-// run().then(([result1, result2]) => {
-//   console.log('Part 1:', result1);
-//   console.log('Part 2:', result2);
-// });
+run().then(([result1, result2]) => {
+  console.log('Part 1:', result1);
+  console.log('Part 2:', result2);
+});
 
-function calculatePart1(input: { x: number, y: number }[]): number {
-  let arrForCheck = [];
-  const map = {};
-  const count = {};
-  let maxX = 0;
-  let maxY = 0;
-  for (const i in input) {
-    if (input[i].x > maxX) {
-      maxX = input[i].x;
-    }
+function calculatePart1(input: Point[]): number {
+  const maxX = Math.max(...input.map(i => i.x));
+  const maxY = Math.max(...input.map(i => i.y));
+  const excludeSet = new Set<number>();
+  const lengthes = new Array(input.length).fill(0);
+  for (let y = 0; y <= maxY; y++) {
+    // let s = '';
+    for (let x = 0; x <= maxX; x++) {
 
-    if (input[i].y > maxY) {
-      maxY = input[i].y;
+      const point = getMinLength({x, y}, input);
+      // s += ',' + ('00' + point).slice(-2);
+      if (point >= 0) {
+        lengthes[point]++;
+      }
+      if (x === 0 || y === 0 || x === maxX || y === maxY) {
+        excludeSet.add(point);
+      }
     }
-    map[cordToStr(input[i])] = i;
-    arrForCheck.push(cordToStr(input[i]));
-    count[i] = 1;
+    // console.log(s)
   }
+  // console.log(lengthes);
+  // console.log(excludeSet);
+  return lengthes.filter((v, i) => !excludeSet.has(i)).sort((a, b) => b - a)[0];
 
-  for (let z = 0; z < 1000; z++) {
-    const arrCp = arrForCheck.slice();
-    const newArr = [];
-    for (const cord of arrCp) {
-      const index = map[cord];
-      if (index == -1) {
-        continue;
-      }
-      const numbCord = strToCord(cord);
-      const l = {x: numbCord.x - 1, y: numbCord.y};
-      if (l.x >= 0 && l.x <= maxX && l.y >= 0 && l.y <= maxY) {
-        if (checkPositions(l, map, arrCp, count, index)) {
-          newArr.push(cordToStr(l));
-        }
-      }
-
-      const r = {x: numbCord.x + 1, y: numbCord.y};
-      if (r.x >= 0 && r.x <= maxX && r.y >= 0 && r.y <= maxY) {
-        if (checkPositions(r, map, arrCp, count, index)) {
-          newArr.push(cordToStr(r));
-        }
-      }
-      const t = {x: numbCord.x, y: numbCord.y - 1};
-      if (t.x >= 0 && t.x <= maxX && t.y >= 0 && t.y <= maxY) {
-        if (checkPositions(t, map, arrCp, count, index)) {
-          newArr.push(cordToStr(t));
-        }
-      }
-      const b = {x: numbCord.x, y: numbCord.y + 1};
-      if (b.x >= 0 && b.x <= maxX && b.y >= 0 && b.y <= maxY) {
-        if (checkPositions(b, map, arrCp, count, index)) {
-          newArr.push(cordToStr(b));
-        }
-      }
-    }
-    if (newArr.length === 0) {
-      break;
-    }
-    arrForCheck = newArr;
-  }
-
-  console.log(count);
-  console.log(map);
 }
 
-function checkPositions(point: { x: number, y: number }, map, arrForCheck: string[], count, index): boolean {
-
-  if (!map[cordToStr(point)]) {
-    map[cordToStr(point)] = index;
-    count[index]++;
-    return true;
-  } else if (arrForCheck.indexOf(cordToStr(point)) >= 0) {
-    const newIndex = map[cordToStr(point)];
-    if (index != newIndex && newIndex != -1) {
-      map[cordToStr(point)] = -1;
-      count[newIndex]--;
+function getMinLength(point: Point, points: Point[]): number {
+  let minLength = Infinity;
+  let minLengthIndex = -1;
+  for (let i in points) {
+    const length = getLength(points[i], point);
+    if (length < minLength) {
+      minLength = length;
+      minLengthIndex = +i;
+    } else if (minLength === length) {
+      minLengthIndex = -1;
     }
   }
-
+  return minLengthIndex;
 }
 
-function cordToStr(cord: { x: number, y: number }): string {
-  return `${cord.x},${cord.y}`;
+function getLength(a: Point, b: Point): number {
+  return Math.abs(a.x - b.x) + Math.abs(a.y - b.y);
 }
 
-function strToCord(str: string): { x: number, y: number } {
-  const spl = str.split(',');
-  return {x: +spl[0], y: +spl[1]};
+function getTotalLength(point: Point, points: Point[]): number {
+  let sum = 0;
+  for (const p of points) {
+    sum+= getLength(point, p);
+  }
+  
+  return sum;
 }
 
-function calculatePart2(input) {
+function calculatePart2(input, totalNeed) {
+  const maxX = Math.max(...input.map(i => i.x));
+  const maxY = Math.max(...input.map(i => i.y));
+  let count = 0;
+  for (let y = 0; y <= maxY; y++) {
+    // let s = '';
+    for (let x = 0; x <= maxX; x++) {
 
+      const total = getTotalLength({x, y}, input);
+      if (total < totalNeed) {
+        count++;
+      }
+    }
+  }
+  return count;
 }
 
 function parse(input: string): { x: number, y: number }[] {
@@ -111,21 +89,26 @@ function parse(input: string): { x: number, y: number }[] {
 export async function run() {
   const input: string = await getInput(DAY);
   const result1 = calculatePart1(parse(input));
-  const result2 = calculatePart2(parse(input));
+  const result2 = calculatePart2(parse(input), 10000);
   return [result1, result2];
 }
 
 function tests() {
   const part1Test = getTestFunction((input) => calculatePart1(parse(input)));
-  // const part2Test = getTestFunction((input) => calculatePart2(parse(input)));
+  const part2Test = getTestFunction((input) => calculatePart2(parse(input), 32));
   part1Test(`1, 1
 1, 6
 8, 3
 3, 4
 5, 5
-8, 9`, 0);
+8, 9`, 17);
   console.log('---------------------');
 
-  // part2Test([], 0);
+  part2Test(`1, 1
+1, 6
+8, 3
+3, 4
+5, 5
+8, 9`, 16);
   console.log('---------------------');
 }
