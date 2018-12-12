@@ -9,8 +9,8 @@ run().then(([result1, result2]) => {
 });
 
 function calculatePart1(input) {
-  let zeroItem = 3;
-  let state = '...' + input[0] + '...';
+  let zeroItem = 5;
+  let state = '.....' + input[0] + '.....';
   const rules = input[1];
   for (let i = 0; i < 20; i++) {
     const newState = [];
@@ -19,9 +19,8 @@ function calculatePart1(input) {
       const val = rules[slice] || '.';
       newState.push(val);
     }
-    state = '....' + newState.join('') + '....';
-    zeroItem += 2;
-    console.log(state);
+    state = '.....' + newState.join('') + '.....';
+    zeroItem += 3;
   }
   let result = 0;
   for (let i = 0; i < state.length; i++) {
@@ -35,8 +34,9 @@ function calculatePart1(input) {
 }
 
 function calculatePart2(input) {
-  let zeroItem = 3;
-  let state = '...' + input[0] + '...';
+  let hunredVal = 0;
+  let zeroItem = 5;
+  let state = '.....' + input[0] + '.....';
   let prevCount = 0;
   let count = 0;
   const rules = input[1];
@@ -51,10 +51,15 @@ function calculatePart2(input) {
       }
       newState.push(val);
     }
-    state = '....' + newState.join('') + '....';
-    zeroItem += 2;
+    state = '.....' + newState.join('') + '.....';
+    zeroItem += 3;
     const val = getCount(state, zeroItem);
-    console.log(i, val);
+    if (i === 99) {
+      hunredVal = val;
+      const change = val - prevCount;
+      return hunredVal + ((50000000000 - 100) * change)
+    }
+    prevCount = val;
   }
 }
 
@@ -83,7 +88,7 @@ function parse(input: string): [string, { [from: string]: string }] {
 
 export async function run() {
   const input: string = await getInput(DAY);
-  const result1 = '0';///calculatePart1(parse(input));
+  const result1 = calculatePart1(parse(input));
   const result2 = calculatePart2(parse(input));
   return [result1, result2];
 }
