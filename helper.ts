@@ -19,7 +19,10 @@ export function getInput(day: number): Promise<string> {
       });
 
       response.on('end', function () {
-        resolve(str.trim());
+        if (str.charAt(str.length - 1) === '\n') {
+          str = str.slice(0, -1);
+        }
+        resolve(str);
       });
     });
 
