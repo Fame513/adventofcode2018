@@ -29,7 +29,7 @@ class Unit {
   move(map: (string | Unit)[][]): boolean {
     if (this.health <= 0) {
       map[this.y][this.x] = '.';
-      return true;
+      return false;
     }
     // console.log(map.map(row => row.join('')).join('\n'));
 
@@ -51,6 +51,7 @@ class Unit {
     }
     const u2 = map[nearest2.y][nearest2.x];
     if (typeof u2 !== 'string') {
+      // console.log(this.type, 'hit', u2.type);
       u2.health -= this.power;
       if (u2.health <= 0) {
         map[u2.y][u2.x] = '.'
@@ -81,13 +82,17 @@ class Unit {
     for (const move of MOVES) {
       const u = map[this.y + move.y][this.x + move.x];
       if (typeof u === 'string' && u === '.') {
-        path.push({x: this.x + move.x, y: this.y + move.y, from: {x: this.x + move.x, y: this.y + move.y}});
+        path.push({x: this.x + move.x, y: this.y + move.y, from: {x: this.x + move.x, y: this.y + move.y}, length: 1});
         visitedMap[coordToString(this.x + move.x, this.y + move.y)] = true;
       }
     }
-    
+    let nearestLength = 0;
+    const enemies = [];
     while (path.length) {
       const p = path.shift();
+      if (nearestLength && p.length > nearestLength) {
+        break;
+      }
       for (const move of MOVES) {
         const strCord = coordToString( p.x + move.x, p.y + move.y);
         if (visitedMap[strCord]) {
@@ -95,12 +100,19 @@ class Unit {
         }
         const u = map[p.y + move.y][p.x + move.x];
         if (typeof u === 'string' && u === '.') {
-          path.push({x: p.x + move.x, y: p.y + move.y, from: p.from});
+          path.push({x: p.x + move.x, y: p.y + move.y, from: p.from, length: p.length + 1});
           visitedMap[strCord] = true;
         } else if (typeof u !== 'string' && u.type !== this.type) {
-          return p.from;
+          enemies.push({x: u.x, y: u.y, from: p.from});
+          if (!nearestLength) {
+            nearestLength = p.length;
+          }
         }
       }
+    }
+    if (enemies.length) {
+      enemies.sort((a, b) => a.y === b.y ? a.x - b.x : a.y - b.y);
+      return enemies[0].from;
     }
     
   }
@@ -111,16 +123,16 @@ function coordToString(x: number, y: number): string {
 } 
 
 tests();
-run().then(([result1, result2]) => {
-  console.log('Part 1:', result1);
-  console.log('Part 2:', result2);
-});
+// run().then(([result1, result2]) => {
+//   console.log('Part 1:', result1);
+//   console.log('Part 2:', result2);
+// });
 
 function calculatePart1(input: (string | Unit)[][]) {
   let hasMove = true;
   let moveCount = 0;
-  // console.log(moveCount);
-  // console.log(input.map(row => row.join('')).join('\n'));
+  console.log(moveCount);
+  console.log(input.map(row => row.join('')).join('\n'));
   while (hasMove) {
     moveCount++;
     hasMove = false;
@@ -139,6 +151,11 @@ function calculatePart1(input: (string | Unit)[][]) {
         hasMove = true;
       }
     }
+    for (const unit of moved) {
+      if (unit.type === 'E') {
+        // console.log('E health', unit.health);
+      }
+    }
     // console.log(moveCount);
     // console.log(input.map(row => row.join('')).join('\n'));
   }
@@ -148,7 +165,7 @@ function calculatePart1(input: (string | Unit)[][]) {
       const u = input[y][x];
       if (typeof u !== 'string') {
         score += u.health;
-        // console.log(u.health);
+        console.log(u.health);
       }
     }
   }
