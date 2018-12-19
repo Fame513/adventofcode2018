@@ -3,69 +3,108 @@ import {getInput, getTestFunction} from './helper';
 const DAY = 17;
 
 tests();
-// run().then(([result1, result2]) => {
-//   console.log('Part 1:', result1);
-//   console.log('Part 2:', result2);
-// });
+run().then(([result1, result2]) => {
+  console.log('Part 1:', result1);
+  console.log('Part 2:', result2);
+});
 
 function calculatePart1(input: {[cord: string]: string}, min: number, max: number) {
-  console.log(input);
-  console.log(min);
-  console.log(max);
-  fillWithSpring(input, 500, 0, min, max);
+  // console.log(input);
+  // console.log(min);
+  // console.log(max);
+  fillRow(input, 500, min, min, max);
+  let result = 0;
+  for (const coord in input) {
+    if (input[coord] === '~' || input[coord] === '|') {
+      result++
+    }
+  }
+  
+  const logArr = [];
+  for (let y = min; y <= 15; y++) {
+    const logRow = [];
+    for (let x = 450; x < 550; x++) {
+      logRow.push(input[coordToStr(x, y)] || '.')
+    }
+    logArr.push(logRow);
+  }
+  console.log(logArr.map(row => row.join('')).join('\n'));
+  return result;
+}
+
+function fillRow(map: { [cord: string]: string }, xs: number, ys: number, min: number, max: number) {
+  if (ys > max) {
+    return true;
+  }
+  if (!map[coordToStr(xs, ys + 1)]) {
+    fillRow(map, xs, ys + 1, min, max);
+  }
+   
+  const bottom = map[coordToStr(xs, ys + 1)];
+  if (bottom === '#' || bottom === '~') {
+    const hasLeftWall = hasWall(map, xs, ys, -1, min, max);
+    const hasRightWall = hasWall(map, xs, ys, 1, min, max);
+    const fillVal = hasLeftWall && hasRightWall ? '~' : '|';
+    let i = xs;
+    while (map[coordToStr(i, ys)] !== '#') {
+      map[coordToStr(i, ys)] = fillVal;
+      if (!map[coordToStr(i, ys + 1)]) {
+        fillRow(map, i, ys + 1, min, max);
+        break;
+      } else if( map[coordToStr(i, ys + 1)]=== '|') {
+        break
+      }
+      i++;
+    }
+    i = xs;
+    while (map[coordToStr(i, ys)] !== '#') {
+      map[coordToStr(i, ys)] = fillVal;
+      if (!map[coordToStr(i, ys + 1)]) {
+        fillRow(map, i, ys + 1, min, max);
+        break;
+      } else if( map[coordToStr(i, ys + 1)]=== '|') {
+        break
+      }
+      i--;
+    }
+  } else {
+    map[coordToStr(xs, ys)] = '|'
+  }
+}
+
+function hasWall(map: { [cord: string]: string }, x: number, y: number, direction: 1 | -1, min, max): boolean {
+  if ( map[coordToStr(x, y)] === '#') {
+    return true
+  } else if (!map[coordToStr(x, y + 1)]) {
+    fillRow(map, x, y + 1, min, max);
+    return map[coordToStr(x, y + 1)] !== '|';
+  } else {
+    return hasWall(map, x + direction, y, direction, min, max);
+  }
+}
+
+function calculatePart2(input: {[cord: string]: string}, min: number, max: number) {
+  // console.log(input);
+  // console.log(min);
+  // console.log(max);
+  fillRow(input, 500, min, min, max);
   let result = 0;
   for (const coord in input) {
     if (input[coord] === '~') {
       result++
     }
   }
+
+  const logArr = [];
+  for (let y = min; y <= 15; y++) {
+    const logRow = [];
+    for (let x = 450; x < 550; x++) {
+      logRow.push(input[coordToStr(x, y)] || '.')
+    }
+    logArr.push(logRow);
+  }
+  console.log(logArr.map(row => row.join('')).join('\n'));
   return result;
-}
-
-function fillWithSpring(map: { [cord: string]: string }, xs: number, ys: number, min: number, max: number) {
-  let bottom;
-  for (let y = ys; y <= max; y++) {
-    if (map[coordToStr(xs, y)] === '#') {
-      bottom = y - 1;
-      break;
-    } else {
-      map[coordToStr(xs, y)] === '~';
-    }
-  }
-  if (bottom) {
-    let go = true;
-    while (bottom >= min && bottom >= ys && go) {
-      for (let x = xs; ; x--) {
-        if (map[coordToStr(x, bottom)] === '#') {
-          break;
-        }
-        if (map[coordToStr(x, bottom + 1)] !== '#') {
-          fillWithSpring(map, x, bottom, min, max);
-          map[coordToStr(x, bottom)] = '~';
-          go = false;
-          break;
-        }
-        map[coordToStr(x, bottom)] = '~';
-      }
-      for (let x = xs; ; x++) {
-        if (map[coordToStr(x, bottom)] === '#') {
-          break;
-        }
-        if (map[coordToStr(x, bottom + 1)] !== '#') {
-          fillWithSpring(map, x, bottom, min, max);
-          map[coordToStr(x, bottom)] = '~';
-          go = false;
-          break;
-        }
-        map[coordToStr(x, bottom)] = '~';
-      }
-      bottom--;
-    }
-  }
-}
-
-function calculatePart2(input) {
-
 }
 
 function coordToStr(x: number, y: number): string {
@@ -105,7 +144,7 @@ function parse(input: string): [{[cord: string]: string}, number, number] {
 export async function run() {
   const input: string = await getInput(DAY);
   const result1 = calculatePart1(...parse(input));
-  const result2 = calculatePart2(parse(input));
+  const result2 = calculatePart2(...parse(input));
   return [result1, result2]
 }
 
