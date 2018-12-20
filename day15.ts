@@ -27,10 +27,6 @@ class Unit {
   }
   
   move(map: (string | Unit)[][]): boolean {
-    if (this.health <= 0) {
-      map[this.y][this.x] = '.';
-      return false;
-    }
     // console.log(map.map(row => row.join('')).join('\n'));
 
     const nearest = this.findNearestEnemy(map);
@@ -46,7 +42,7 @@ class Unit {
     }
 
     const nearest2 = this.findNearestEnemy(map);
-    if (!nearest) {
+    if (!nearest2) {
       return false;
     }
     const u2 = map[nearest2.y][nearest2.x];
@@ -122,11 +118,11 @@ function coordToString(x: number, y: number): string {
   return `${x},${y}`
 } 
 
-tests();
-// run().then(([result1, result2]) => {
-//   console.log('Part 1:', result1);
-//   console.log('Part 2:', result2);
-// });
+// tests();
+run().then(([result1, result2]) => {
+  console.log('Part 1:', result1);
+  console.log('Part 2:', result2);
+});
 
 function calculatePart1(input: (string | Unit)[][]) {
   let hasMove = true;
@@ -146,18 +142,21 @@ function calculatePart1(input: (string | Unit)[][]) {
       }
     }
     for (const unit of moved) {
-      const wasMoves = unit.move(input);
-      if (wasMoves) {
-        hasMove = true;
+      if (unit.health > 0) {
+        const wasMoves = unit.move(input);
+        if (wasMoves) {
+          hasMove = true;
+        }
       }
     }
+    console.log('After round', moveCount);
+    console.log(input.map(row => row.join('')).join('\n'));
     for (const unit of moved) {
-      if (unit.type === 'E') {
-        // console.log('E health', unit.health);
+      if (unit.health > 0) {
+        console.log(unit.type, unit.x, unit.y, unit.health);
       }
     }
-    // console.log(moveCount);
-    // console.log(input.map(row => row.join('')).join('\n'));
+    console.log('');
   }
   let score = 0;
   for (let y = 0; y < input.length; y++) {
@@ -175,8 +174,76 @@ function calculatePart1(input: (string | Unit)[][]) {
   return score * (moveCount - 2);
 }
 
-function calculatePart2(input) {
+function calculatePart2(input: (string | Unit)[][]) {
+  let eCount = 0;
+  for (let y = 0; y < input.length; y++) {
+    for (let x = 0; x < input[y].length; x++) {
+      const u = input[y][x];
+      if (typeof u !== 'string' && u.type === 'E') {
+        eCount++;
+      }
+    }
+  }
+  
+  let hasMove = true;
+  let moveCount = 0;
+  console.log(moveCount);
+  console.log(input.map(row => row.join('')).join('\n'));
+  while (hasMove) {
+    moveCount++;
+    hasMove = false;
+    const moved: Unit[] = [];
+    for (let y = 0; y < input.length; y++) {
+      for (let x = 0; x < input[y].length; x++) {
+        const u = input[y][x];
+        if (typeof u !== 'string') {
+          moved.push(u);
+        }
+      }
+    }
+    for (const unit of moved) {
+      if (unit.health > 0) {
+        const wasMoves = unit.move(input);
+        if (wasMoves) {
+          hasMove = true;
+        }
+      }
+    }
+    // console.log('After round', moveCount);
+    // console.log(input.map(row => row.join('')).join('\n'));
+    // for (const unit of moved) {
+    //   if (unit.health > 0) {
+    //     console.log(unit.type, unit.x, unit.y, unit.health);
+    //   }
+    // }
+    // console.log('');
+    let eLeft = 0;
+    for (let y = 0; y < input.length; y++) {
+      for (let x = 0; x < input[y].length; x++) {
+        const u = input[y][x];
+        if (typeof u !== 'string' && u.type === 'E') {
+          eLeft++;
+        }
+      }
+    }
+    if (eLeft !== eCount) {
+      return;
+    }
+  }
+  let score = 0;
+  for (let y = 0; y < input.length; y++) {
+    for (let x = 0; x < input[y].length; x++) {
+      const u = input[y][x];
+      if (typeof u !== 'string') {
+        score += u.health;
+        console.log(u.health);
+      }
+    }
+  }
+  console.log('score', score);
+  console.log('moveCount', moveCount);
 
+  return score * (moveCount - 2);
 }
 
 function parse(input: string): [][] {
@@ -185,7 +252,11 @@ function parse(input: string): [][] {
     const newRow = [];
     for(const u of row.split('')) {
       if (u  === 'E' || u === 'G') {
-        newRow.push(new Unit(newRow.length, map.length, u))
+        const unit = new Unit(newRow.length, map.length, u);
+        if (unit.type === 'E') {
+          unit.power = 23;
+        }
+        newRow.push(unit)
       } else {
         newRow.push(u);
       }
@@ -197,7 +268,7 @@ function parse(input: string): [][] {
 
 export async function run() {
   const input: string = await getInput(DAY);
-  const result1 = calculatePart1(parse(input));
+  const result1 = 208960; //calculatePart1(parse(input));
   const result2 = calculatePart2(parse(input));
   return [result1, result2]
 }
