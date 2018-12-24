@@ -17,7 +17,7 @@ run().then(([result1, result2]) => {
   console.log('Part 2:', result2);
 });
 
-function calculatePart1(xTarget, yTarget, depth) {
+function calculatePart1(depth, xTarget, yTarget) {
   let result = 0;
   const riskMap = {};
   for(let y = 0; y <= yTarget; y++) {
@@ -58,7 +58,7 @@ function getRisk(x, y, riskMap, depth, xTarget, yTarget) {
 }
 
 
-function calculatePart2(xTarget, yTarget, depth) {
+function calculatePart2(depth, xTarget, yTarget) {
   const extraSize = 30;
   const xMax = xTarget + extraSize;
   const yMax = yTarget + extraSize;
@@ -112,23 +112,22 @@ function calculatePart2(xTarget, yTarget, depth) {
   return Math.min(lm.t || Infinity, lm.c ? lm.c + 7 : Infinity, lm.n ? lm.n + 7 : Infinity)
 }
 
-function parse(input: string): number[] {
-  const regexp = /\d+/;
-  return input.split('\n')
-    .map(row => row.match(regexp))
-    .map(val => +val)
+function parse(input: string): [number, number, number] {
+  const regexp = /depth: (\d+)\ntarget: (\d+),(\d+)/;
+  const res =  input.match(regexp);
+  return [+res[1], +res[2], +res[3]];
 }
 
 export async function run() {
-  // const input: string = await getInput(DAY);
-  const result1 = calculatePart1(15, 700, 4848);
-  const result2 = calculatePart2(15, 700, 4848);
+  const input: string = await getInput(DAY);
+  const result1 = calculatePart1(...parse(input));
+  const result2 = calculatePart2(...parse(input));
   return [result1, result2]
 }
 
 function tests() {
-  const part1Test = getTestFunction((input) => calculatePart1(10, 10, 510));
-  const part2Test = getTestFunction((input) => calculatePart2(10, 10, 510));
+  const part1Test = getTestFunction((input) => calculatePart1(510, 10, 10));
+  const part2Test = getTestFunction((input) => calculatePart2(510, 10, 10));
   part1Test([], 114);
   console.log('---------------------');
 
